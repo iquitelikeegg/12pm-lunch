@@ -34,7 +34,7 @@ function preload() {
     game.load.image('ground', 'assets/platform.png');
     game.load.image('collectable_1', 'assets/chicken_32x32.png');
     game.load.image('collectable_2', 'assets/burger_32x32.png');
-    game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 64, 64);
+    game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
 }
 
 function create() {
@@ -54,7 +54,7 @@ function create() {
     var ground = platforms.create(0, game.world.height - 64, 'ground');
 
     //Scale it to fit the width of the game (the original sprite is 400x32in size).
-    ground.scale.setTo(2, 2);
+    //ground.scale.setTo(2, 2);
 
     //This stops it from falling away when you jump on it.
     ground.body.immovable = true;
@@ -62,9 +62,13 @@ function create() {
     //Now let's create 2 ledges.
     var ledge = platforms.create(400, 400, 'ground');
 
+    ledge.scale.setTo(0.5, 0.5);
+
     ledge.body.immovable = true;
 
     ledge = platforms.create(-150, 250, 'ground');
+
+    ledge.scale.setTo(0.5, 0.5);
 
     ledge.body.immovable = true;
 
