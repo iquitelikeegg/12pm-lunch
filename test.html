@@ -32,6 +32,7 @@ var timers = {};
 function preload() {
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
+    game.load.image('ledge', 'assets/ledge.png');
     game.load.image('collectable_1', 'assets/chicken_32x32.png');
     game.load.image('collectable_2', 'assets/burger_32x32.png');
     game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
@@ -60,15 +61,15 @@ function create() {
     ground.body.immovable = true;
 
     //Now let's create 2 ledges.
-    var ledge = platforms.create(400, 400, 'ground');
+    var ledge = platforms.create(400, 400, 'ledge');
 
-    ledge.scale.setTo(0.5, 0.5);
+    //ledge.scale.setTo(0.5, 0.5);
 
     ledge.body.immovable = true;
 
-    ledge = platforms.create(-150, 250, 'ground');
+    ledge = platforms.create(-150, 250, 'ledge');
 
-    ledge.scale.setTo(0.5, 0.5);
+    //ledge.scale.setTo(0.5, 0.5);
 
     ledge.body.immovable = true;
 
