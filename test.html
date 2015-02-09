@@ -18,7 +18,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create
 
 var player;
 var platforms;
-var stars;
+var collectables;
 var score = 0;
 var scoreText;
 
@@ -32,7 +32,8 @@ var timers = {};
 function preload() {
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
-    game.load.image('star', 'assets/star.png');
+    game.load.image('collectable_1', 'assets/chicken_32x32.png');
+    game.load.image('collectable_2', 'assets/burger_32x32.png');
     game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
 }
 
@@ -91,20 +92,20 @@ function create() {
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
 
-    stars = game.add.group();
+    collectables = game.add.group();
 
-    stars.enableBody = true;
+    collectables.enableBody = true;
 
-    //Create 12 evenly spaced stars.
+    //Create 12 evenly spaced collectables.
     for (var i = 0; i < 12; i++) {
-        //Create a star inside of the 'stars' group.
-        var star  = stars.create(i * 70, 0, 'star');
+        //Create a collectable inside of the 'collectables' group.
+        var collectable  = collectables.create(i * 70, 0, chooseCollectable());
 
         //Let Gravity do it's thing.
-        star.body.gravity.y = 250 + (Math.random() * 40 - 20);
+        collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
 
-        //This gives each star a slightly random bounce value.
-        star.body.bounce.y = 0.1 + Math.random() * 0.2;
+        //This gives each collectable a slightly random bounce value.
+        collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
     }
 
     scoreText = game.add.text(16, 16, 'score: 0', {fontSize: '32px', fill: '#fff'});
@@ -150,33 +151,37 @@ function update() {
         player.jump.count = 0;
     }
 
-    game.physics.arcade.collide(stars, platforms);
+    game.physics.arcade.collide(collectables, platforms);
 
-    game.physics.arcade.overlap(player, stars, collectStar, null, this);
+    game.physics.arcade.overlap(player, collectables, collectCollectable, null, this);
 
-    dropNewStar();
+    dropNewCollectable();
 }
 
-function collectStar(player, star) {
-    //Remove star from screen.
-    star.kill();
+function collectCollectable(player, collectable) {
+    //Remove collectable from screen.
+    collectable.kill();
 
     score += 10;
     scoreText.text = "score: " + score;
 }
 
 /**
- * calculate if a new star should drop;
+ * calculate if a new collectable should drop;
  */
-function dropNewStar() {
-    //1/100 chance to drop new star
+function dropNewCollectable() {
+    //1/100 chance to drop new collectable
     if (Math.round(Math.random() * 100) > 99) {
-        var star = stars.create(Math.random() * 800, 0, 'star');
-        star.body.gravity.y = 250 + (Math.random() * 40 - 20);
-        star.body.bounce.y = 0.1 + Math.random() * 0.2;
+        var collectable = collectables.create(Math.random() * 800, 0, chooseCollectable());
+        collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
+        collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
     }
 
     return false;
+}
+
+function chooseCollectable() {
+    return (Math.random() > 0.5) ? 'collectable_1' : 'collectable_2';
 }
 
 </script>
