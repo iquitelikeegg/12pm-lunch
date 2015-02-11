@@ -2,19 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>Phaser - Making your first game, part 1</title>
+    <title>12pm Lunch</title>
     <script type="text/javascript" src="js/phaser.min.js"></script>
     <style type="text/css">
     body {
         margin: 0;
+        padding: 50px;
+        background-color: black;
+        color: white;
+    }
+
+    .container {
+        margin: 0 auto;
+        width: 800px;
     }
     </style>
 </head>
 <body>
+<div class="container">
+    <h1>12pm lunch!</h1>
+    <div id="game--container"></div>
+</div>
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game--container', { preload: preload, create: create, update: update });
 
 var player;
 var platforms;
@@ -36,6 +48,7 @@ function preload() {
     game.load.image('collectable_1', 'assets/chicken_32x32.png');
     game.load.image('collectable_2', 'assets/burger_32x32.png');
     game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
+    game.load.spritesheet('baddie_salad_leaf', 'assets/salad-leaf_128x32.png', 32, 32);
 }
 
 function create() {
@@ -77,17 +90,17 @@ function create() {
     player = game.add.sprite(32, game.world.height - 150, 'dude');
 
     // Implements a double jump!
-    player.jump = {
-        count : 0,
-        max : 2
-    };
+    // player.jump = {
+    //     count : 0,
+    //     max : 2
+    // };
 
     //Enable physics on the player.
     game.physics.arcade.enable(player);
 
     //Player physics properties. Give him some bounce.
-    player.body.bounce.y  = 0.2;
-    player.body.gravity.y = 1000;
+    player.body.bounce.y  = 0;
+    player.body.gravity.y = 2000;
     player.body.collideWorldBounds = true;
 
     // Our 2 animations, walking left and right;
@@ -137,24 +150,34 @@ function update() {
         player.frame = 4;
     }
 
-    if (cursors.up.isDown
-        && (player.body.touching.down || player.jump.count < player.jump.max)
-        && pressed.up === false
-    ) {
-        clearTimeout(timers.jump);
+    if (cursors.up.isDown && player.body.touching.down && pressed.up === false) {
+        player.body.velocity.y = -800;
 
         pressed.up = true;
-        player.body.velocity.y = -400;
 
-        timers.jump = setTimeout(function() {
-            player.jump.count++;
+        setTimeout(function() {
             pressed.up = false;
-        }, 200);
+        }, 1000);
     }
 
-    if (player.body.touching.down) {
-        player.jump.count = 0;
-    }
+    // if (cursors.up.isDown
+    //     && (player.body.touching.down || player.jump.count < player.jump.max)
+    //     && pressed.up === false
+    // ) {
+    //     clearTimeout(timers.jump);
+    //
+    //     pressed.up = true;
+    //     player.body.velocity.y = -400;
+    //
+    //     timers.jump = setTimeout(function() {
+    //         player.jump.count++;
+    //         pressed.up = false;
+    //     }, 200);
+    // }
+
+    // if (player.body.touching.down) {
+    //     player.jump.count = 0;
+    // }
 
     game.physics.arcade.collide(collectables, platforms);
 
@@ -190,6 +213,5 @@ function chooseCollectable() {
 }
 
 </script>
-
 </body>
 </html>
