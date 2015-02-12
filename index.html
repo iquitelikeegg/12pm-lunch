@@ -13,6 +13,7 @@
         <div id="game"></div>
         <div id="game--overlay">
             <div class="message">
+                <div id="buddy-guy"></div>
                 <h2></h2>
                 <p></p>
                 <h3></h3>
@@ -358,9 +359,19 @@ function endGame() {
     message.querySelector('h3').innerHTML = generatePromoCode();
     message.querySelector('p').innerHTML  = "Score: " + score;
 
+    var buddyGuy = document.getElementById('buddy-guy');
+
     setTimeout(function() {
         message.classList.add('show');
     }, 800);
+
+    setInterval(function() {
+        if (buddyGuy.classList.contains('and')) {
+            buddyGuy.classList.remove('and');
+        } else {
+            buddyGuy.classList.add('and');
+        }
+    }, 500);
 }
 
 function generatePromoCode() {

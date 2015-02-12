@@ -33,7 +33,7 @@ body {
 #game--overlay .message {
     position: absolute;
     left: 50%;
-    top: -400px;
+    top: -500px;
     margin-left: -250px;
     border: 1px solid #bbb;
     padding: 30px;
@@ -54,6 +54,20 @@ body {
 
 #game--overlay .message.show {
     top: 50px;
+}
+
+#game--overlay #buddy-guy {
+    margin: 0 auto;
+    margin-bottom: 20px;
+    width: 48px;
+    height: 64px;
+    background-image: url('assets/main-guy_288x64.png');
+    background-size: 288px;
+    background-position-x: -240px;
+}
+
+#game--overlay #buddy-guy.and {
+    background-position-x : -192px;
 }
 
 #game--overlay .message h2 {
