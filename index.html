@@ -4,29 +4,27 @@
     <meta charset="UTF-8" />
     <title>12pm Lunch</title>
     <script type="text/javascript" src="js/phaser.min.js"></script>
-    <style type="text/css">
-    body {
-        margin: 0;
-        padding: 50px;
-        background-color: black;
-        color: white;
-    }
-
-    .container {
-        margin: 0 auto;
-        width: 800px;
-    }
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <div class="container">
     <h1>12pm lunch!</h1>
-    <div id="game--container"></div>
+    <div id="game--container">
+        <div id="game"></div>
+        <div id="game--overlay">
+            <div class="message">
+                <h2></h2>
+                <p></p>
+                <h3></h3>
+                <a href="/">Second lunch!</a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script type="text/javascript">
 
-var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game--container', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
 
 var player;
 var platforms;
@@ -341,6 +339,36 @@ function endGame() {
     player.body.collideWorldBounds = false;
 
     gameState = gameStates.ended;
+
+    var overlay = document.getElementById('game--overlay');
+    overlay.style.opacity = 1;
+
+    var message = overlay.querySelector('.message');
+
+    if (score >= 150) {
+        message.querySelector('h2').innerHTML = "Well done, you've won yourself a prize!";
+        //message.querySelector('h3').innerHTML = generatePromoCode();
+    } else if (score >= 100) {
+        message.querySelector('h2').innerHTML = "Hey! Save some for the rest of us!";
+    } else if (score >= 50) {
+        message.querySelector('h2').innerHTML = "Well, you must be full...";
+    } else {
+        message.querySelector('h2').innerHTML = "Lunchtime's over, get back to work!";
+    }
+    message.querySelector('h3').innerHTML = generatePromoCode();
+    message.querySelector('p').innerHTML  = "Score: " + score;
+
+    setTimeout(function() {
+        message.classList.add('show');
+    }, 800);
+}
+
+function generatePromoCode() {
+    var d = new Date();
+
+    var uniqueComponent = btoa(d.getTime());
+
+    return "promo_" + uniqueComponent.substr(0, uniqueComponent.indexOf('=='));
 }
 
 </script>
