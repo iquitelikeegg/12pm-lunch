@@ -35,6 +35,7 @@ var score = 0;
 var scoreText;
 var enemies;
 var enemiesCollection = [];
+var jumpCooldown = 800;
 
 var pressed = {
     up : false,
@@ -103,6 +104,9 @@ function create() {
 
     //The player and its settings.
     player = game.add.sprite(32, game.world.height - 150, 'dude');
+
+    //inialise a few player variables.
+    player.direction = 'right';
 
     // Implements a double jump!
     // player.jump = {
@@ -175,27 +179,46 @@ function update() {
 
         if (cursors.left.isDown) {
             //Move to the left.
-            player.body.velocity.x = -250;
-            player.animations.play('left');
+            player.direction = 'left';
+
+            if (player.body.touching.down) {
+                player.body.velocity.x = -250;
+                player.animations.play('left');
+            } else {
+                //air movement is slower;
+                player.body.velocity.x = -250;
+                player.frame = 0;
+            }
         } else if (cursors.right.isDown) {
             //Move to the right.
-            player.body.velocity.x = 250;
-            player.animations.play('right');
+            player.direction = 'right';
+
+            if (player.body.touching.down) {
+                player.body.velocity.x = 250;
+                player.animations.play('right');
+            } else {
+                player.body.velocity.x = 250;
+                player.frame = 1;
+            }
         } else {
             //Stand Still.
             player.animations.stop();
 
-            player.frame = 4;
+            if (player.body.touching.down) {
+                player.frame = (player.direction === 'right') ? 4 : 3;
+            }
         }
 
         if (cursors.up.isDown && player.body.touching.down && pressed.up === false) {
             player.body.velocity.y = -800;
 
+            player.frame = (player.direction === 'right') ? 1 : 0;
+
             pressed.up = true;
 
             setTimeout(function() {
                 pressed.up = false;
-            }, 1000);
+            }, jumpCooldown);
         }
 
         // if (cursors.up.isDown
@@ -341,37 +364,41 @@ function endGame() {
 
     gameState = gameStates.ended;
 
-    var overlay = document.getElementById('game--overlay');
-    overlay.style.opacity = 1;
-
-    var message = overlay.querySelector('.message');
-
-    if (score >= 150) {
-        message.querySelector('h2').innerHTML = "Well done, you've won yourself a prize!";
-        //message.querySelector('h3').innerHTML = generatePromoCode();
-    } else if (score >= 100) {
-        message.querySelector('h2').innerHTML = "Hey! Save some for the rest of us!";
-    } else if (score >= 50) {
-        message.querySelector('h2').innerHTML = "Well, you must be full...";
-    } else {
-        message.querySelector('h2').innerHTML = "Lunchtime's over, get back to work!";
-    }
-    message.querySelector('h3').innerHTML = generatePromoCode();
-    message.querySelector('p').innerHTML  = "Score: " + score;
-
-    var buddyGuy = document.getElementById('buddy-guy');
-
     setTimeout(function() {
-        message.classList.add('show');
-    }, 800);
+        var overlay = document.getElementById('game--overlay');
+        overlay.style.opacity = 1;
 
-    setInterval(function() {
-        if (buddyGuy.classList.contains('and')) {
-            buddyGuy.classList.remove('and');
+        var message = overlay.querySelector('.message');
+
+        if (score >= 150) {
+            message.querySelector('h2').innerHTML = "Well done, you've won yourself a prize!";
+            // Generate a "promo" code if a certain score is reached.
+            message.querySelector('h3').style.display   = "block";
+            message.querySelector('h3').innerHTML = generatePromoCode();
+        } else if (score >= 100) {
+            message.querySelector('h2').innerHTML = "Hey! Save some for the rest of us!";
+        } else if (score >= 50) {
+            message.querySelector('h2').innerHTML = "Well, you must be full...";
         } else {
-            buddyGuy.classList.add('and');
+            message.querySelector('h2').innerHTML = "Lunchtime's over, get back to work!";
         }
-    }, 500);
+
+        message.querySelector('p').innerHTML  = "Score: " + score;
+
+        var buddyGuy = document.getElementById('buddy-guy');
+
+        setTimeout(function() {
+            message.classList.add('show');
+        }, 800);
+
+        setInterval(function() {
+            if (buddyGuy.classList.contains('and')) {
+                buddyGuy.classList.remove('and');
+            } else {
+                buddyGuy.classList.add('and');
+            }
+        }, 500);
+    }, 1000);
 }
 
 function generatePromoCode() {
