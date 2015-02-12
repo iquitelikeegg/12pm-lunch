@@ -31,7 +31,7 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, cr
 var player;
 var platforms;
 var collectables;
-var collectablesCount;
+var collectablesCount = 0;
 var score = 0;
 var scoreText;
 var enemies;
@@ -60,8 +60,8 @@ function preload() {
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
     game.load.image('ledge', 'assets/ledge.png');
-    game.load.image('collectable_1', 'assets/chicken_32x32.png');
-    game.load.image('collectable_2', 'assets/burger_32x32.png');
+    game.load.spritesheet('collectable_1', 'assets/chicken_96x32.png', 32, 32);
+    game.load.spritesheet('collectable_2', 'assets/burger_96x32.png', 32, 32);
     game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
     game.load.spritesheet('baddie_salad-leaf', 'assets/salad-leaf_128x32.png', 32, 32);
     game.load.spritesheet('baddie_potato', 'assets/potato_192x48.png', 48, 48);
@@ -141,16 +141,8 @@ function create() {
     //Create evenly spaced collectables up to the limit.
     for (var i = 0; i < collectablesLimit; i++) {
         //Create a collectable inside of the 'collectables' group.
-        var collectable  = collectables.create(i * 70, 0, chooseCollectable());
-
-        //Let Gravity do it's thing.
-        collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
-
-        //This gives each collectable a slightly random bounce value.
-        collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
+        addCollectable(i * 70, 0);
     }
-
-    collectablesCount = collectablesLimit;
 
 
     // The villains.
@@ -256,6 +248,8 @@ function enemyCollide(player, enemy) {
 }
 
 function collectCollectable(player, collectable) {
+
+
     //Remove collectable from screen.
     collectable.kill();
 
@@ -275,17 +269,20 @@ function dropNewCollectable() {
 
     //1/100 chance to drop new collectable
     if (Math.round(Math.random() * 100) > 99) {
-        var collectable = collectables.create(Math.random() * (game.world.width - 24), 0, chooseCollectable());
-        collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
-        collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
-        collectablesCount++;
+        addCollectable(Math.random() * (game.world.width - 24), 0);
     }
-
-    return false;
 }
 
-function chooseCollectable() {
-    return (Math.random() > 0.5) ? 'collectable_1' : 'collectable_2';
+function addCollectable(spawnX, spawnY) {
+    var collectable = collectables.create(
+        spawnX,
+        spawnY,
+        ((Math.random() > 0.5) ? 'collectable_1' : 'collectable_2')
+    );
+
+    collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
+    collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
+    collectablesCount++;
 }
 
 function animateBaddies() {

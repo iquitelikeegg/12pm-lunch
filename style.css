@@ -30,6 +30,8 @@ h1 {
     -webit-box-shadow: -2px -2px 0px 2px #333;
     -o-box-shadow:     -2px -2px 0px 2px #333;
     -moz-box-shadow:   -2px -2px 0px 2px #333;
+    border-bottom: 1px solid #666;
+    border-right: 1px solid #666;
 }
 
 #game--overlay {
