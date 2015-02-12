@@ -60,12 +60,13 @@ function preload() {
     game.load.image('sky', 'assets/sky.png');
     game.load.image('ground', 'assets/platform.png');
     game.load.image('ledge', 'assets/ledge.png');
-    game.load.spritesheet('collectable_1', 'assets/chicken_96x32.png', 32, 32);
-    game.load.spritesheet('collectable_2', 'assets/burger_96x32.png', 32, 32);
+    game.load.image('collectable_1', 'assets/chicken_32x32.png');
+    game.load.image('collectable_2', 'assets/burger_32x32.png');
     game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
     game.load.spritesheet('baddie_salad-leaf', 'assets/salad-leaf_128x32.png', 32, 32);
     game.load.spritesheet('baddie_potato', 'assets/potato_192x48.png', 48, 48);
     game.load.spritesheet('baddie_brocolli', 'assets/brocolli_192x50.png', 48, 50);
+    game.load.spritesheet('blink', 'assets/blink_64x32.png', 32, 32);
 }
 
 function create() {
@@ -248,15 +249,16 @@ function enemyCollide(player, enemy) {
 }
 
 function collectCollectable(player, collectable) {
-
-
-    //Remove collectable from screen.
-    collectable.kill();
+    var blink = game.add.sprite(player.x, player.y, 'blink');
+    blink.animations.add('explode', [0,1], 2, false);
+    blink.animations.play('explode', 2, false, true);
 
     collectablesCount--;
 
     score += 10;
     scoreText.text = "score: " + score;
+
+    collectable.kill();
 }
 
 /**
@@ -282,6 +284,7 @@ function addCollectable(spawnX, spawnY) {
 
     collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
     collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
+
     collectablesCount++;
 }
 
