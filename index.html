@@ -249,7 +249,7 @@ function enemyCollide(player, enemy) {
 }
 
 function collectCollectable(player, collectable) {
-    var blink = game.add.sprite(player.x, player.y, 'blink');
+    var blink = game.add.sprite(collectable.x, collectable.y, 'blink');
     blink.animations.add('explode', [0,1], 2, false);
     blink.animations.play('explode', 2, false, true);
 
