@@ -1,9 +1,14 @@
+@font-face {
+    font-family: "visitor";
+    src: url('fonts/visitor.ttf');
+}
+
 body {
     margin: 0;
     padding: 50px;
-    background-color: black;
+    background-color: #555;
     color: white;
-    font-family: Helvetica, Arial, sans-serif;
+    font-family: 'visitor', courier, monospace;
 }
 
 .container {
@@ -11,8 +16,20 @@ body {
     width: 800px;
 }
 
+h1 {
+    font-size: 48px;
+    text-align: center;
+    text-shadow: 3px 3px 0px #444;
+    margin: 0;
+    margin-bottom: 30px;
+}
+
 #game--container {
     position: relative;
+    box-shadow:        -2px -2px 0px 2px #333;
+    -webit-box-shadow: -2px -2px 0px 2px #333;
+    -o-box-shadow:     -2px -2px 0px 2px #333;
+    -moz-box-shadow:   -2px -2px 0px 2px #333;
 }
 
 #game--overlay {

@@ -274,7 +274,7 @@ function dropNewCollectable() {
 
     //1/100 chance to drop new collectable
     if (Math.round(Math.random() * 100) > 99) {
-        var collectable = collectables.create(Math.random() * game.world.width, 0, chooseCollectable());
+        var collectable = collectables.create(Math.random() * (game.world.width - 24), 0, chooseCollectable());
         collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
         collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
         collectablesCount++;
