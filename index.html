@@ -34,7 +34,8 @@ var collectables;
 var collectablesCount;
 var score = 0;
 var scoreText;
-var enemies = [];
+var enemies;
+var enemiesCollection = [];
 
 var pressed = {
     up : false,
@@ -45,6 +46,14 @@ var pressed = {
 var collectablesLimit = 12;
 
 var timers = {};
+
+var gameStates = {
+    'not_started' : 0,
+    'running'     : 1,
+    'ended'       : 2
+};
+
+var gameState = gameStates.not_started;
 
 function preload() {
     game.load.image('sky', 'assets/sky.png');
@@ -102,8 +111,6 @@ function create() {
     //     max : 2
     // };
 
-    generateBaddies();
-
     //Enable physics on the player.
     game.physics.arcade.enable(player);
 
@@ -112,13 +119,17 @@ function create() {
     player.body.gravity.y = 2000;
     player.body.collideWorldBounds = true;
 
-    // Our 2 animations, walking left and right;
+    // Our animations, walking left and right;
     player.animations.add('left', [3, 2], 5, true);
     player.animations.add('right', [5, 4], 5, true);
+    player.animations.add('jumpLeft', [0], 1, true);
+    player.animations.add('jumpRight', [2], 1, true);
 
     //  Our controls.
     cursors = game.input.keyboard.createCursorKeys();
 
+
+    // Collectables
     collectables = game.add.group();
 
     collectables.enableBody = true;
@@ -137,66 +148,88 @@ function create() {
 
     collectablesCount = collectablesLimit;
 
+
+    // The villains.
+    enemies = game.add.group();
+
+    generateBaddies();
+
+
+    // The Score.
     scoreText = game.add.text(16, 16, 'score: 0', {fontSize: '32px', fill: '#fff'});
+
+
+    // Game state
+    gameState = gameStates.running;
 }
 
 function update() {
-    game.physics.arcade.collide(player, platforms);
-
     //Resetthe players velocity (movement);
     player.body.velocity.x = 0;
 
-    if (cursors.left.isDown) {
-        //Move to the left.
-        player.body.velocity.x = -250;
-        player.animations.play('left');
-    } else if (cursors.right.isDown) {
-        //Move to the right.
-        player.body.velocity.x = 250;
-        player.animations.play('right');
-    } else {
-        //Stand Still.
-        player.animations.stop();
-
-        player.frame = 4;
-    }
-
-    if (cursors.up.isDown && player.body.touching.down && pressed.up === false) {
-        player.body.velocity.y = -800;
-
-        pressed.up = true;
-
-        setTimeout(function() {
-            pressed.up = false;
-        }, 1000);
-    }
-
-    // if (cursors.up.isDown
-    //     && (player.body.touching.down || player.jump.count < player.jump.max)
-    //     && pressed.up === false
-    // ) {
-    //     clearTimeout(timers.jump);
-    //
-    //     pressed.up = true;
-    //     player.body.velocity.y = -400;
-    //
-    //     timers.jump = setTimeout(function() {
-    //         player.jump.count++;
-    //         pressed.up = false;
-    //     }, 200);
-    // }
-
-    // if (player.body.touching.down) {
-    //     player.jump.count = 0;
-    // }
-
     game.physics.arcade.collide(collectables, platforms);
 
-    game.physics.arcade.overlap(player, collectables, collectCollectable, null, this);
-
-    dropNewCollectable();
-
     animateBaddies();
+
+    if (gameState !== gameStates.ended) {
+        game.physics.arcade.collide(player, platforms);
+
+        if (cursors.left.isDown) {
+            //Move to the left.
+            player.body.velocity.x = -250;
+            player.animations.play('left');
+        } else if (cursors.right.isDown) {
+            //Move to the right.
+            player.body.velocity.x = 250;
+            player.animations.play('right');
+        } else {
+            //Stand Still.
+            player.animations.stop();
+
+            player.frame = 4;
+        }
+
+        if (cursors.up.isDown && player.body.touching.down && pressed.up === false) {
+            player.body.velocity.y = -800;
+
+            pressed.up = true;
+
+            setTimeout(function() {
+                pressed.up = false;
+            }, 1000);
+        }
+
+        // if (cursors.up.isDown
+        //     && (player.body.touching.down || player.jump.count < player.jump.max)
+        //     && pressed.up === false
+        // ) {
+        //     clearTimeout(timers.jump);
+        //
+        //     pressed.up = true;
+        //     player.body.velocity.y = -400;
+        //
+        //     timers.jump = setTimeout(function() {
+        //         player.jump.count++;
+        //         pressed.up = false;
+        //     }, 200);
+        // }
+
+        // if (player.body.touching.down) {
+        //     player.jump.count = 0;
+        // }
+
+        game.physics.arcade.overlap(player, collectables, collectCollectable, null, this);
+
+        game.physics.arcade.overlap(player, enemies, enemyCollide, null, this);
+
+        dropNewCollectable();
+    }
+}
+
+function enemyCollide(player, enemy) {
+    player.body.velocity.y = -300;
+
+    endGame();
 }
 
 function collectCollectable(player, collectable) {
@@ -233,21 +266,23 @@ function chooseCollectable() {
 }
 
 function animateBaddies() {
-    for (var i = 0; i < enemies.length; i++) {
-        game.physics.arcade.collide(enemies[i], platforms);
+    for (var i = 0; i < enemiesCollection.length; i++) {
+        game.physics.arcade.collide(enemiesCollection[i], platforms);
 
-        if (enemies[i].x <= enemies[i].bounds.left) {
-            enemies[i].direction = 'right';
-        } else if (enemies[i].x >= enemies[i].bounds.right) {
-            enemies[i].direction = 'left';
+        if (enemiesCollection[i].x <= enemiesCollection[i].bounds.left) {
+            enemiesCollection[i].direction = 'right';
+        } else if (enemiesCollection[i].x >= enemiesCollection[i].bounds.right) {
+            enemiesCollection[i].direction = 'left';
         }
 
-        if (enemies[i].direction === 'left') {
-            enemies[i].body.velocity.x = -100;
-            enemies[i].animations.play('left');
+        enemiesCollection[i].body.velocity.x = 0;
+
+        if (enemiesCollection[i].direction === 'left') {
+            enemiesCollection[i].body.velocity.x = -100;
+            enemiesCollection[i].animations.play('left');
         } else {
-            enemies[i].body.velocity.x = 100;
-            enemies[i].animations.play('right');
+            enemiesCollection[i].body.velocity.x = 100;
+            enemiesCollection[i].animations.play('right');
         }
     }
 }
@@ -267,16 +302,16 @@ function addBaddie(spawnX, spawnY, type) {
 
     switch (type) {
         case 1 :
-            enemy = game.add.sprite(spawnX, spawnY, 'baddie_salad-leaf');
+            enemy = enemies.create(spawnX, spawnY, 'baddie_salad-leaf');
             break;
         case 2 :
-            enemy = game.add.sprite(spawnX, spawnY, 'baddie_potato');
+            enemy = enemies.create(spawnX, spawnY, 'baddie_potato');
             break;
         case 3 :
-            enemy = game.add.sprite(spawnX, spawnY, 'baddie_brocolli');
+            enemy = enemies.create(spawnX, spawnY, 'baddie_brocolli');
             break;
         default:
-            enemy = game.add.sprite(spawnX, spawnY, 'baddie_salad-leaf');
+            enemy = enemies.create(spawnX, spawnY, 'baddie_salad-leaf');
             break;
     }
 
@@ -299,7 +334,13 @@ function addBaddie(spawnX, spawnY, type) {
         enemy.bounds.left = game.world.width - 400;
     }
 
-    enemies.push(enemy);
+    enemiesCollection.push(enemy);
+}
+
+function endGame() {
+    player.body.collideWorldBounds = false;
+
+    gameState = gameStates.ended;
 }
 
 </script>
