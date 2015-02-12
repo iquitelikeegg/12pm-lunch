@@ -53,6 +53,7 @@ h1 {
     position: absolute;
     left: 50%;
     top: -500px;
+    box-sizing: border-box;
     margin-left: -250px;
     border: 1px solid #bbb;
     padding: 30px;
