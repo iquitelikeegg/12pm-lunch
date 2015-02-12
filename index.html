@@ -31,14 +31,19 @@ var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game--container', { preload: 
 var player;
 var platforms;
 var collectables;
+var collectablesCount;
 var score = 0;
 var scoreText;
+var enemies = [];
 
 var pressed = {
     up : false,
     left: false,
     right: false
 };
+
+var collectablesLimit = 12;
+
 var timers = {};
 
 function preload() {
@@ -48,7 +53,9 @@ function preload() {
     game.load.image('collectable_1', 'assets/chicken_32x32.png');
     game.load.image('collectable_2', 'assets/burger_32x32.png');
     game.load.spritesheet('dude', 'assets/main-guy_288x64.png', 48, 64);
-    game.load.spritesheet('baddie_salad_leaf', 'assets/salad-leaf_128x32.png', 32, 32);
+    game.load.spritesheet('baddie_salad-leaf', 'assets/salad-leaf_128x32.png', 32, 32);
+    game.load.spritesheet('baddie_potato', 'assets/potato_192x48.png', 48, 48);
+    game.load.spritesheet('baddie_brocolli', 'assets/brocolli_192x50.png', 48, 50);
 }
 
 function create() {
@@ -95,6 +102,8 @@ function create() {
     //     max : 2
     // };
 
+    generateBaddies();
+
     //Enable physics on the player.
     game.physics.arcade.enable(player);
 
@@ -114,8 +123,8 @@ function create() {
 
     collectables.enableBody = true;
 
-    //Create 12 evenly spaced collectables.
-    for (var i = 0; i < 12; i++) {
+    //Create evenly spaced collectables up to the limit.
+    for (var i = 0; i < collectablesLimit; i++) {
         //Create a collectable inside of the 'collectables' group.
         var collectable  = collectables.create(i * 70, 0, chooseCollectable());
 
@@ -125,6 +134,8 @@ function create() {
         //This gives each collectable a slightly random bounce value.
         collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
     }
+
+    collectablesCount = collectablesLimit;
 
     scoreText = game.add.text(16, 16, 'score: 0', {fontSize: '32px', fill: '#fff'});
 }
@@ -184,11 +195,15 @@ function update() {
     game.physics.arcade.overlap(player, collectables, collectCollectable, null, this);
 
     dropNewCollectable();
+
+    animateBaddies();
 }
 
 function collectCollectable(player, collectable) {
     //Remove collectable from screen.
     collectable.kill();
+
+    collectablesCount--;
 
     score += 10;
     scoreText.text = "score: " + score;
@@ -198,11 +213,16 @@ function collectCollectable(player, collectable) {
  * calculate if a new collectable should drop;
  */
 function dropNewCollectable() {
+    if (collectablesCount >= collectablesLimit) {
+        return false;
+    }
+
     //1/100 chance to drop new collectable
     if (Math.round(Math.random() * 100) > 99) {
-        var collectable = collectables.create(Math.random() * 800, 0, chooseCollectable());
+        var collectable = collectables.create(Math.random() * game.world.width, 0, chooseCollectable());
         collectable.body.gravity.y = 250 + (Math.random() * 40 - 20);
         collectable.body.bounce.y = 0.1 + Math.random() * 0.2;
+        collectablesCount++;
     }
 
     return false;
@@ -210,6 +230,76 @@ function dropNewCollectable() {
 
 function chooseCollectable() {
     return (Math.random() > 0.5) ? 'collectable_1' : 'collectable_2';
+}
+
+function animateBaddies() {
+    for (var i = 0; i < enemies.length; i++) {
+        game.physics.arcade.collide(enemies[i], platforms);
+
+        if (enemies[i].x <= enemies[i].bounds.left) {
+            enemies[i].direction = 'right';
+        } else if (enemies[i].x >= enemies[i].bounds.right) {
+            enemies[i].direction = 'left';
+        }
+
+        if (enemies[i].direction === 'left') {
+            enemies[i].body.velocity.x = -100;
+            enemies[i].animations.play('left');
+        } else {
+            enemies[i].body.velocity.x = 100;
+            enemies[i].animations.play('right');
+        }
+    }
+}
+
+// Generate 3 enemies;
+function generateBaddies() {
+    addBaddie(0, 0, 1);
+    addBaddie(450, 300, 2);
+    addBaddie(750, 450, 3);
+}
+
+function addBaddie(spawnX, spawnY, type) {
+    // var spawnX = Math.random() * game.world.width;
+    // var spawnY = Math.random() * (game.world.height - 64);
+
+    var enemy;
+
+    switch (type) {
+        case 1 :
+            enemy = game.add.sprite(spawnX, spawnY, 'baddie_salad-leaf');
+            break;
+        case 2 :
+            enemy = game.add.sprite(spawnX, spawnY, 'baddie_potato');
+            break;
+        case 3 :
+            enemy = game.add.sprite(spawnX, spawnY, 'baddie_brocolli');
+            break;
+        default:
+            enemy = game.add.sprite(spawnX, spawnY, 'baddie_salad-leaf');
+            break;
+    }
+
+    enemy.animations.add('left', [0, 1], 2, true);
+    enemy.animations.add('right', [2, 3], 2, true);
+    game.physics.arcade.enable(enemy);
+    enemy.body.collideWorldBounds = true;
+    enemy.body.gravity.y = 500;
+
+    enemy.bounds = {
+        left  : 0,
+        right : game.world.width - enemy.width
+    };
+
+    enemy.direction = (Math.random() > 0.5) ? 'left' : 'right';
+
+    if (spawnY < (250 - enemy.height) && spawnX < 250) {
+        enemy.bounds.right = 250 - enemy.width;
+    } else if (spawnY < (400 - enemy.height) && spawnX > 400) {
+        enemy.bounds.left = game.world.width - 400;
+    }
+
+    enemies.push(enemy);
 }
 
 </script>
